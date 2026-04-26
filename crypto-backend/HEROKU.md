@@ -1,8 +1,30 @@
 # Deploy `crypto-backend` to Heroku (from this monorepo)
 
-The Git repo **root** is one folder above this app, so there is no `Gemfile` at the root. **Heroku’s language detector** only sees Ruby if a `Gemfile` is at the app root, which causes:
+The Git repo **root** is one folder above this app, so there is no `Gemfile` at the monorepo root. **A plain `heroku/ruby` buildpack only looks in the root**, so you must add a **subdirectory buildpack** first, then Ruby.
 
-> `No default language could be detected for this app`
+> **Typical error:** the log shows only `Using buildpack: heroku/ruby` and *“we couldn't find any supported Ruby project files”* while listing `crypto-backend/`, `crypto-dashboard/`, `README.md`. That means the **subdir buildpack is missing** or not **first** in the list—fix it with step 2 below.  
+> (A root `app.json` in this repo documents the right buildpacks; you still need to set config vars and buildpacks on the Heroku app—see *Verify before push*.)
+
+## Verify before push (required)
+
+Run (replace `YOUR_APP` with your Heroku app name):
+
+```bash
+heroku buildpacks -a YOUR_APP
+```
+
+You must see **two** buildpacks, in this order:
+
+1. `https://github.com/timanovsky/heroku-buildpack-subdir` (or `heroku-buildpack-subdir` from the registry)  
+2. `heroku/ruby`
+
+And:
+
+```bash
+heroku config:get PROJECT_PATH -a YOUR_APP
+```
+
+It must print **`crypto-backend`**. If `PROJECT_PATH` is wrong or missing, the subdir step does nothing and Ruby still runs at the monorepo root and fails.
 
 ## Fix: subdirectory buildpack + Ruby buildpack
 
@@ -13,14 +35,17 @@ The Git repo **root** is one folder above this app, so there is no `Gemfile` at 
    heroku create your-app-name
    ```
 
-2. **Point Heroku at the `crypto-backend` folder** before the Ruby buildpack runs:
+2. **Point Heroku at the `crypto-backend` folder** *before* the Ruby buildpack runs. **Order matters:** subdir first, then Ruby.
 
    ```bash
-   heroku buildpacks:clear
-   heroku buildpacks:add --index 1 https://github.com/timanovsky/heroku-buildpack-subdir
-   heroku buildpacks:add --index 2 heroku/ruby
-   heroku config:set PROJECT_PATH=crypto-backend
+   # Use -a your-app on every line if the git remote is not the default
+   heroku buildpacks:clear -a YOUR_APP
+   heroku buildpacks:add --index 1 https://github.com/timanovsky/heroku-buildpack-subdir -a YOUR_APP
+   heroku buildpacks:add --index 2 heroku/ruby -a YOUR_APP
+   heroku config:set PROJECT_PATH=crypto-backend -a YOUR_APP
    ```
+
+   After this, `heroku buildpacks -a YOUR_APP` must list **two** entries (see *Verify before push*).
 
 3. **Postgres** (add-on provides `DATABASE_URL`):
 
@@ -72,3 +97,16 @@ The Git repo **root** is one folder above this app, so there is no `Gemfile` at 
 ## Alternative: only deploy the backend
 
 If you prefer **not** to use the subdir buildpack, create a small Git repo that only contains the contents of `crypto-backend` (or use `git subtree split`) and `heroku create` in that tree so `Gemfile` is at the root of the pushed branch. The subdir buildpack is usually simpler for a monorepo.
+
+## Alternative subdir buildpack (if the first one fails)
+
+Some teams use [lstoll/heroku-buildpack-monorepo](https://github.com/lstoll/heroku-buildpack-monorepo) with **`APP_BASE`** (path to the app) instead of `PROJECT_PATH`:
+
+```bash
+heroku buildpacks:clear -a YOUR_APP
+heroku buildpacks:add --index 1 https://github.com/lstoll/heroku-buildpack-monorepo
+heroku buildpacks:add --index 2 heroku/ruby
+heroku config:set APP_BASE=crypto-backend -a YOUR_APP
+```
+
+Use **either** timanovsky + `PROJECT_PATH` **or** lstoll + `APP_BASE`—not both.

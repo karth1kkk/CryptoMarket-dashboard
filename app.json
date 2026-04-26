@@ -1,0 +1,18 @@
+{
+  "name": "crypto-market-dashboard",
+  "description": "Monorepo: Ruby API lives in crypto-backend. Heroku must use a subdir buildpack; see crypto-backend/HEROKU.md.",
+  "env": {
+    "PROJECT_PATH": {
+      "description": "Subdirectory that contains the Gemfile (required by the subdir buildpack).",
+      "value": "crypto-backend"
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "https://github.com/timanovsky/heroku-buildpack-subdir"
+    },
+    {
+      "url": "heroku/ruby"
+    }
+  ]
+}

@@ -196,7 +196,7 @@ Missing `NEXT_PUBLIC_API_BASE_URL` throws at import time in `getBase()`.
 
 ## Heroku (backend)
 
-The Git root is the monorepo parent, so there is **no `Gemfile` at the repository root** — Heroku’s detector reports *“No default language could be detected”* unless you point the build at `crypto-backend`. Use a **subdirectory buildpack** and set `PROJECT_PATH=crypto-backend`, then add `heroku/ruby`. Step-by-step commands, Postgres, and env vars are in **[crypto-backend/HEROKU.md](crypto-backend/HEROKU.md)**. A `Procfile` in `crypto-backend` defines the `web` and `release` processes.
+The Git root is the monorepo parent, so there is **no `Gemfile` at the repository root** — if Heroku only runs **`heroku/ruby`**, the build fails because it only looks for `Gemfile` next to `README.md`. You need **two** buildpacks in order: a **subdirectory** buildpack, then `heroku/ruby`, plus `PROJECT_PATH=crypto-backend`. A root [`app.json`](app.json) documents that layout; you must still run `heroku buildpacks` and `heroku config:set` on the app (see **[crypto-backend/HEROKU.md](crypto-backend/HEROKU.md)**, including *Verify before push*). The `Procfile` lives in `crypto-backend/`.
 
 ---
 
