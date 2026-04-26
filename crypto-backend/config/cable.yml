@@ -4,7 +4,15 @@ development:
 test:
   adapter: test
 
+# Use `REDIS_URL` (e.g. Heroku Redis) when you need Redis-backed Action Cable. On
+# simple API deploys, `async` avoids a Redis add-on. Set REDIS_URL in production to use redis.
+<% redis_url = ENV['REDIS_URL'] %>
+<% if redis_url.to_s.strip != '' %>
 production:
   adapter: redis
-  url: <%= ENV.fetch("REDIS_URL") { "redis://localhost:6379/1" } %>
+  url: <%= redis_url %>
   channel_prefix: crypto_backend_production
+<% else %>
+production:
+  adapter: async
+<% end %>
