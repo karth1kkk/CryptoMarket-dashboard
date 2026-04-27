@@ -12,11 +12,14 @@ This repository includes **`Gemfile` and `Gemfile.lock` at the monorepo root** s
    heroku config:unset PROJECT_PATH APP_BASE 2>/dev/null || true
    ```
 
-2. **Postgres** (add-on provides `DATABASE_URL`):
+2. **Postgres** — **required before the `release` phase** runs `db:prepare`. The add-on sets `DATABASE_URL` on the dyno. If you deploy without it, you get socket connection errors.
 
    ```bash
    heroku addons:create heroku-postgresql:essential-0 -a YOUR_APP
+   heroku config:get DATABASE_URL -a YOUR_APP   # should print postgres://...
    ```
+
+   If `DATABASE_URL` is empty, attach Postgres (or paste a URL from another host), then redeploy or run `heroku run rails db:prepare -a YOUR_APP` after config is set.
 
 3. **Rails / secrets** — from `crypto-backend` on your machine:
 

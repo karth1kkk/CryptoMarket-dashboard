@@ -91,18 +91,20 @@ test:
 # `*_DATABASE_URL` env vars (see Rails multiple databases docs).
 #
 production:
+  # Heroku and other hosts set DATABASE_URL. If it is missing, `url` is blank and
+  # PostgreSQL falls back to local Unix sockets (confusing errors on Linux/Heroku).
   primary: &primary_production
     <<: *default
-    url: <%= ENV['DATABASE_URL'] %>
+    url: <%= ENV.fetch("DATABASE_URL") %>
   cache:
     <<: *primary_production
-    url: <%= ENV['DATABASE_URL'] %>
+    url: <%= ENV.fetch("DATABASE_URL") %>
     migrations_paths: db/cache_migrate
   queue:
     <<: *primary_production
-    url: <%= ENV['DATABASE_URL'] %>
+    url: <%= ENV.fetch("DATABASE_URL") %>
     migrations_paths: db/queue_migrate
   cable:
     <<: *primary_production
-    url: <%= ENV['DATABASE_URL'] %>
+    url: <%= ENV.fetch("DATABASE_URL") %>
     migrations_paths: db/cable_migrate
