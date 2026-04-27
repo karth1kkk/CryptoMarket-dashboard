@@ -196,7 +196,7 @@ Missing `NEXT_PUBLIC_API_BASE_URL` throws at import time in `getBase()`.
 
 ## Heroku (backend)
 
-The Git root is the monorepo parent, so there is **no `Gemfile` at the repository root** — if Heroku only runs **`heroku/ruby`**, the build fails because it only looks for `Gemfile` next to `README.md`. You need **two** buildpacks in order: a **subdirectory** buildpack, then `heroku/ruby`, plus `PROJECT_PATH=crypto-backend`. A root [`app.json`](app.json) documents that layout; you must still run `heroku buildpacks` and `heroku config:set` on the app (see **[crypto-backend/HEROKU.md](crypto-backend/HEROKU.md)**, including *Verify before push*). The `Procfile` lives in `crypto-backend/`.
+The monorepo includes a **root** [`Gemfile`](Gemfile) that `eval_gemfile`’s `crypto-backend/Gemfile`, plus **root** [`Gemfile.lock`](Gemfile.lock), [`.ruby-version`](.ruby-version), and [`Procfile`](Procfile) so a single **`heroku/ruby`** buildpack can detect the app. Full steps, env vars, and an optional “subdir buildpack only” path are in **[crypto-backend/HEROKU.md](crypto-backend/HEROKU.md)**. After changing gems under `crypto-backend/`, run `bundle install` (or `bundle lock`) at the **monorepo root** and commit the root `Gemfile.lock`.
 
 ---
 

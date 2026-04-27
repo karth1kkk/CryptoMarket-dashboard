@@ -12,7 +12,7 @@ bin/rails s -p 3001
 
 Set `FRONTEND_URL` (defaults to `http://localhost:3000`) for CORS. The frontend’s `NEXT_PUBLIC_API_BASE_URL` should match the host and port you use here.
 
-**Heroku:** this app lives in a monorepo; see **[HEROKU.md](HEROKU.md)** for the subdir buildpack and `PROJECT_PATH`.
+**Heroku:** the monorepo has a root `Gemfile` + `Procfile` so `heroku/ruby` works; see **[HEROKU.md](HEROKU.md)**.
 
 ## Notable code
 
