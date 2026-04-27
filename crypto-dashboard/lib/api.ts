@@ -1,4 +1,9 @@
-import type { CoinMarket, SearchCoin, MarketChartData } from "@/types/coin";
+import type {
+  CoinGeckoDetail,
+  CoinMarket,
+  SearchCoin,
+  MarketChartData,
+} from "@/types/coin";
 import { apiClient } from "./apiClient";
 
 export async function fetchMarkets(
@@ -28,10 +33,10 @@ export async function fetchMarketChart(
 }
 
 export async function fetchCoin(id: string) {
-    const { data } = await apiClient.get<Record<string, unknown>>(
-        `/api/v1/coins/${encodeURIComponent(id)}`
-    );
-    return data;
+  const { data } = await apiClient.get<CoinGeckoDetail>(
+    `/api/v1/coins/${encodeURIComponent(id)}`
+  );
+  return data;
 }
 
 export async function searchCoins(q: string) {

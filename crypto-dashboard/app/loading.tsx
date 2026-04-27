@@ -1,15 +1,19 @@
+import { TableSkeleton } from "@/components/TableSkeleton";
+import { Card, CardHeader } from "@/components/Card";
+
 export default function Loading() {
-    return (
-        <main className="min-h-screen p-4 sm:p-6 md:p-8 max-w-4xl mx-auto">
-            <div className="h-8 w-48 bg-zinc-200 dark:bg-zinc-800 rounded mb-6 animate-pulse"/>
-            <div className="space-y-z">
-                {Array.from({ length: 8 }).map((_, i) => (
-                    <div
-                    key={i}
-                    className="h-14 rounded-xl bg-zinc-200 dark:bg-zinc-800 animate-pulse"
-                    />
-                ))}
-            </div>
-        </main>
-    );
+  return (
+    <div className="max-w-6xl">
+      <div className="mb-4 md:mb-5">
+        <div className="h-5 w-40 animate-pulse rounded bg-slate-800" />
+        <div className="mt-2 h-3 w-56 animate-pulse rounded bg-slate-800/60" />
+      </div>
+      <Card>
+        <CardHeader>Spot markets</CardHeader>
+        <div className="p-0 md:p-1">
+          <TableSkeleton />
+        </div>
+      </Card>
+    </div>
+  );
 }

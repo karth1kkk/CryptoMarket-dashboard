@@ -1,73 +1,197 @@
+import Image from "next/image";
 import Link from "next/link";
-import { fetchCoin, fetchMarketChart }from "@/lib/api";
+import { fetchCoin, fetchMarketChart } from "@/lib/api";
+import { pickCoinStats } from "@/lib/coinData";
+import {
+  formatCompactUsd,
+  formatPercent,
+  formatSupply,
+  formatUsd,
+} from "@/lib/format";
 import { PriceChart } from "@/components/PriceChart";
+import { Card, CardBody } from "@/components/Card";
 
-type PageProps = { 
-    params: Promise<{ id: string }>;
-    searchParams: Promise<{ days?: string }>; 
+type PageProps = {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ days?: string }>;
 };
 
-const RANGE = [7, 30, 365] as const;
+const RANGES: { days: number; label: string }[] = [
+  { days: 7, label: "7d" },
+  { days: 30, label: "30d" },
+  { days: 365, label: "1y" },
+];
+
+const ALLOWED = new Set([7, 30, 365]);
 
 function parseDays(raw: string | undefined): number {
-    const n = parseInt(raw || "7", 10);
-    if (Number.isNaN(n)) return 7;
-    return Math.min(365, Math.max(1, n));
+  const n = parseInt(raw || "7", 10);
+  if (Number.isNaN(n) || !ALLOWED.has(n)) return 7;
+  return n;
 }
 
-export default async function CoinPage({ params, searchParams}: PageProps) {
-    const { id } = await params;
-    const sp = await searchParams;
-    const days = parseDays(sp.days);
+function StatItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md border border-slate-700/60 bg-slate-900/40 px-3 py-2.5">
+      <p className="text-xs font-medium text-slate-500">{label}</p>
+      <p className="mt-0.5 font-mono text-sm text-slate-100 tabular-nums">
+        {value}
+      </p>
+    </div>
+  );
+}
 
-    let error: string | null = null;
-    let title = id;
-    let chart = null;
-    try{
-        const d = (await fetchCoin(id)) as { name?: string; symbol?: string};
-        if (d.name) title = `${d.name} (${(d.symbol || "").toUpperCase()})`;
-    }catch (e) {
-        error = e instanceof Error ? e.message : "Failed to load coin";
-    }
+function PctDisplay({ v }: { v: number | null }) {
+  if (v == null) return <span className="text-slate-500">—</span>;
+  const up = v >= 0;
+  return (
+    <span
+      className={`font-mono text-sm font-medium tabular-nums ${
+        up ? "text-emerald-400" : "text-red-400"
+      }`}
+    >
+      {formatPercent(v)}
+    </span>
+  );
+}
 
-    try{
-        const data = await fetchMarketChart(id, { days, vsCurrency: "usd"});
-        chart = data;
-    }catch {
-        error = "Failed to load chart data";
-    }
+export default async function CoinPage({ params, searchParams }: PageProps) {
+  const { id } = await params;
+  const sp = await searchParams;
+  const days = parseDays(sp.days);
 
-    return (
-        <main className="min-h-screen p-4 sm:p-6 max-w-4xl mx-auto">
-            <Link 
-            href="/"
-            className="text-sm text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200">
-                Back to market
-            </Link>
-            <h1 className="text-2xl- font-semibold mt-4 text-zinc-900 dark:text-zinc-100">
-                {error ? "Coin" : title}
+  let detailError: string | null = null;
+  let coin: Awaited<ReturnType<typeof fetchCoin>> | null = null;
+  try {
+    coin = await fetchCoin(id);
+  } catch (e) {
+    detailError = e instanceof Error ? e.message : "Failed to load coin";
+  }
+
+  let chartError: string | null = null;
+  let chart = null;
+  try {
+    chart = await fetchMarketChart(id, { days, vsCurrency: "usd" });
+  } catch {
+    chartError = "Chart could not be loaded";
+  }
+
+  const stats = coin ? pickCoinStats(coin) : null;
+  const name = coin?.name ?? (detailError ? "Error" : id);
+  const symbol = (coin?.symbol ?? "").toUpperCase();
+
+  return (
+    <div className="max-w-4xl">
+      <div className="mb-4">
+        <Link
+          href="/"
+          className="text-sm text-slate-500 transition duration-150 hover:text-slate-300"
+        >
+          ← Back to market
+        </Link>
+      </div>
+
+      {detailError && !coin && (
+        <p className="text-sm text-red-400" role="alert">
+          {detailError}
+        </p>
+      )}
+
+      {coin && (
+        <div className="mb-5">
+          <div className="flex items-center gap-2">
+            {coin.image?.small ? (
+              <Image
+                src={coin.image.small}
+                alt=""
+                width={32}
+                height={32}
+                className="h-8 w-8 rounded-full object-cover"
+              />
+            ) : null}
+            <h1 className="text-xl font-semibold text-slate-100">
+              {name}
+              {symbol ? (
+                <span className="ml-2 text-base font-medium text-slate-500">
+                  {symbol}
+                </span>
+              ) : null}
             </h1>
-            {error && <p className="text-red-600 mt-2">{error}</p>}
-            <p className="text-zinc-500 mt-2 text-sm"> ID: {id}</p>
-            <div className="mt-6 flex flex-wrap gap-2">
-                {RANGE.map((d) => (
-                    <Link
-                        key={d}
-                        href={`/coins/${encodeURIComponent(id)}?days=${d}`}
-                        className={
-                            d === days
-                            ? "rounded-lg bg-zinc-900 text-white dark-bg-zinc-100 dark:text-zinc-900 px-3 py-1.5 text-sm"
-                            : "rounded-lg border border-zinc-300 dark:border-zinc-600 py-1.5 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-900"
-                        }
-                        >
-                            {d === 365 ? "1y" : `${d}d`}
-                        </Link>
-                ))}
-                </div>
+          </div>
+          <div className="mt-2 flex flex-wrap items-baseline gap-3">
+            <span className="font-mono text-2xl font-semibold tabular-nums text-slate-50">
+              ${formatUsd(stats?.price ?? null)}
+            </span>
+            <span className="text-sm text-slate-500">24h</span>
+            <PctDisplay v={stats?.change24h ?? null} />
+          </div>
+        </div>
+      )}
 
-                <div className="mt-4 rounded-xl border border-zinc-200 dark:border-zinc-800 p-4 bg-white dark:bg-zinc-950">
-                    {chart?.prices?.length ? <PriceChart prices={chart.prices} /> : <p className="text-zinc-500">No chart data.</p>}
-                </div>
-        </main>
-    )
+      {coin && (
+        <Card aria-label="Price chart" className="mb-4">
+          <div className="flex flex-col gap-2 border-b border-slate-700/60 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-sm font-medium text-slate-200">Price</h2>
+            <div
+              className="flex flex-wrap gap-1.5"
+              role="group"
+              aria-label="Time range"
+            >
+              {RANGES.map(({ days: d, label }) => {
+                const active = d === days;
+                return (
+                  <Link
+                    key={d}
+                    href={`/coins/${encodeURIComponent(id)}?days=${d}`}
+                    className={`rounded-md px-2.5 py-1.5 text-xs font-medium tabular-nums transition duration-150 ${
+                      active
+                        ? "bg-slate-200 text-slate-900"
+                        : "border border-slate-600 text-slate-400 hover:border-slate-500 hover:text-slate-200"
+                    }`}
+                  >
+                    {label}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+          <CardBody>
+            {chartError && (
+              <p className="text-sm text-red-400" role="alert">
+                {chartError}
+              </p>
+            )}
+            {!chartError && chart?.prices?.length ? (
+              <PriceChart prices={chart.prices} />
+            ) : null}
+            {!chartError && !chart?.prices?.length && (
+              <p className="text-sm text-slate-500" role="status">
+                No chart data.
+              </p>
+            )}
+          </CardBody>
+        </Card>
+      )}
+
+      {coin && stats && (
+        <section
+          className="grid grid-cols-1 gap-2 sm:grid-cols-3"
+          aria-label="Key statistics"
+        >
+          <StatItem
+            label="Market cap (USD)"
+            value={`$${formatCompactUsd(stats.marketCap)}`}
+          />
+          <StatItem
+            label="Volume (24h, USD)"
+            value={`$${formatCompactUsd(stats.volume)}`}
+          />
+          <StatItem
+            label="Circulating supply"
+            value={formatSupply(stats.circulating)}
+          />
+        </section>
+      )}
+    </div>
+  );
 }
