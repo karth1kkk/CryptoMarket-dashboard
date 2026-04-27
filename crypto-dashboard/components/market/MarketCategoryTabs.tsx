@@ -33,7 +33,7 @@ export function MarketCategoryTabs({ active, className }: Props) {
   const sp = useSearchParams();
   return (
     <div
-      className={`flex w-full min-w-0 flex-wrap items-center gap-1 rounded-lg border border-slate-200/80 bg-slate-50/80 p-1 dark:border-slate-700/80 dark:bg-slate-900/40${className ? ` ${className}` : ""}`}
+      className={`flex w-full min-w-0 flex-wrap items-center gap-0.5 rounded-lg border border-slate-200/90 bg-slate-100/90 p-0.5 shadow-sm shadow-slate-200/30 dark:border-[#243044] dark:bg-[#0d1119]/90 dark:shadow-sm dark:shadow-black/20${className ? ` ${className}` : ""}`}
       role="tablist"
       aria-label="Market views"
     >
@@ -45,11 +45,11 @@ export function MarketCategoryTabs({ active, className }: Props) {
             href={buildHref(tab.id, sp)}
             role="tab"
             aria-selected={isActive}
-            className={
+            className={`min-h-9 flex-1 rounded-md px-2 py-1.5 text-center text-sm font-medium transition-colors sm:min-w-0 sm:flex-none sm:px-3 ${
               isActive
-                ? "min-h-9 flex-1 rounded-md bg-white px-2 py-1.5 text-center text-sm font-medium text-slate-900 shadow-sm transition-colors sm:min-w-0 sm:flex-none sm:px-3 dark:bg-slate-800 dark:text-slate-100"
-                : "min-h-9 flex-1 rounded-md px-2 py-1.5 text-center text-sm font-medium text-slate-600 transition-colors hover:text-slate-900 sm:min-w-0 sm:flex-none sm:px-3 dark:text-slate-400 dark:hover:text-slate-200"
-            }
+                ? "bg-white text-emerald-800 shadow-sm dark:bg-emerald-500/15 dark:text-emerald-200 dark:shadow-none"
+                : "text-slate-600 hover:bg-slate-200/50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-100"
+            }`}
           >
             <span className="hidden sm:inline">{tab.label}</span>
             <span className="sm:hidden">{tab.short}</span>
