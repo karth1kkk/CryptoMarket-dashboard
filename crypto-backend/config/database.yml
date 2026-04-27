@@ -90,21 +90,23 @@ test:
 # point `DATABASE_URL` at the main DB and, if required, set separate
 # `*_DATABASE_URL` env vars (see Rails multiple databases docs).
 #
+<%# Use a variable so we never call ENV#fetch here — ERB is evaluated during load (and
+    build/run paths) even when RAILS_ENV is not production, and a missing var must not
+    raise KeyError. In production, set DATABASE_URL (Heroku Postgres add-on does this). %>
+<% production_url = ENV["DATABASE_URL"] %>
 production:
-  # Heroku and other hosts set DATABASE_URL. If it is missing, `url` is blank and
-  # PostgreSQL falls back to local Unix sockets (confusing errors on Linux/Heroku).
   primary: &primary_production
     <<: *default
-    url: <%= ENV.fetch("DATABASE_URL") %>
+    url: <%= production_url %>
   cache:
     <<: *primary_production
-    url: <%= ENV.fetch("DATABASE_URL") %>
+    url: <%= production_url %>
     migrations_paths: db/cache_migrate
   queue:
     <<: *primary_production
-    url: <%= ENV.fetch("DATABASE_URL") %>
+    url: <%= production_url %>
     migrations_paths: db/queue_migrate
   cable:
     <<: *primary_production
-    url: <%= ENV.fetch("DATABASE_URL") %>
+    url: <%= production_url %>
     migrations_paths: db/cable_migrate

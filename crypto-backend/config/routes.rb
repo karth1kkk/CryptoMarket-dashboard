@@ -5,8 +5,14 @@ Rails.application.routes.draw do
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Defines the root path route ("/")
-  # root "posts#index"
+  # API-only app: no HTML. Return JSON so GET / in a browser is not 404.
+  get "/", to: proc {
+    [
+      200,
+      { "Content-Type" => "application/json; charset=utf-8" },
+      [ { status: "ok", health: "/up", api: "/api/v1/coins" }.to_json ]
+    ]
+  }
 
   namespace :api do
     namespace :v1 do
