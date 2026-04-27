@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { startTransition, useEffect, useState } from "react";
@@ -75,14 +76,17 @@ export function Navbar() {
           <Link
             href="/"
             className="group flex shrink-0 items-center gap-2"
-            aria-label="CM Market home"
+            aria-label="Krypt Home"
           >
-            <span
-              className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-emerald-500 to-emerald-600 text-[10px] font-bold text-white shadow-sm dark:from-emerald-400 dark:to-emerald-500"
-              aria-hidden
-            >
-              K
-            </span>
+            <Image
+              src="/favicon.svg"
+              alt=""
+              width={28}
+              height={28}
+              unoptimized
+              className="h-7 w-7 shrink-0 rounded-md object-cover shadow-sm"
+              priority
+            />
             <span className="text-[15px] font-semibold tracking-tight text-slate-800 dark:text-slate-100">
               Krypt
             </span>
