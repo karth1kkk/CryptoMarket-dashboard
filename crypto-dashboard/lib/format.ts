@@ -30,3 +30,20 @@ export function formatSupply(n: number | null | undefined): string {
   if (n == null || Number.isNaN(n)) return "—";
   return n.toLocaleString(undefined, { maximumFractionDigits: 0 });
 }
+
+/** e.g. $2,719,571,729,625 */
+export function formatFullIntegerUsd(n: number | null | undefined): string {
+  if (n == null || Number.isNaN(n)) return "—";
+  return n.toLocaleString(undefined, { maximumFractionDigits: 0 });
+}
+
+/** e.g. 2.72 from trillions for display "2.72T" */
+export function formatTrillionLabel(n: number | null | undefined): string {
+  if (n == null || Number.isNaN(n) || n <= 0) return "—";
+  return (n / 1e12).toFixed(2);
+}
+
+export function formatBillionLabel(n: number | null | undefined, digits = 3): string {
+  if (n == null || Number.isNaN(n) || n <= 0) return "—";
+  return (n / 1e9).toFixed(digits);
+}

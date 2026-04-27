@@ -10,12 +10,13 @@ Rails.application.routes.draw do
     [
       200,
       { "Content-Type" => "application/json; charset=utf-8" },
-      [ { status: "ok", health: "/up", api: "/api/v1/coins" }.to_json ]
+      [ { status: "ok", health: "/up", api: "/api/v1/coins", market_overview: "/api/v1/market_overview" }.to_json ]
     ]
   }
 
   namespace :api do
     namespace :v1 do
+      get "market_overview", to: "market_overview#index"
       resources :coins, only: %i[index show], param: :id do
       get :market_chart, on: :member
       get :search, on: :collection

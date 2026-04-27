@@ -4,13 +4,13 @@ import { ChartSkeleton } from "@/components/ChartSkeleton";
 export default function CoinLoading() {
   return (
     <div className="max-w-4xl">
-      <div className="mb-4 h-4 w-28 animate-pulse rounded bg-slate-800" />
+      <div className="mb-4 h-4 w-28 animate-pulse rounded bg-slate-200/90 dark:bg-slate-800" />
       <div className="mb-5 flex items-center gap-2">
-        <div className="h-8 w-8 shrink-0 animate-pulse rounded-full bg-slate-800" />
-        <div className="h-7 w-40 animate-pulse rounded bg-slate-800" />
+        <div className="h-8 w-8 shrink-0 animate-pulse rounded-full bg-slate-200 dark:bg-slate-700" />
+        <div className="h-7 w-40 animate-pulse rounded bg-slate-200/90 dark:bg-slate-800" />
       </div>
-      <div className="mb-2 h-8 w-48 animate-pulse rounded bg-slate-800" />
-      <div className="mb-4 h-3 w-24 animate-pulse rounded bg-slate-800/60" />
+      <div className="mb-2 h-8 w-48 animate-pulse rounded bg-slate-200/90 dark:bg-slate-800" />
+      <div className="mb-4 h-3 w-24 animate-pulse rounded bg-slate-100 dark:bg-slate-800/50" />
       <Card>
         <CardHeader>Price</CardHeader>
         <CardBody>
@@ -21,7 +21,7 @@ export default function CoinLoading() {
         {Array.from({ length: 3 }).map((_, i) => (
           <div
             key={i}
-            className="h-16 animate-pulse rounded-md bg-slate-800/30"
+            className="h-16 animate-pulse rounded-lg bg-slate-100/80 dark:bg-slate-800/30"
           />
         ))}
       </div>

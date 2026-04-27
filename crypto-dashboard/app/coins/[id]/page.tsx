@@ -32,9 +32,11 @@ function parseDays(raw: string | undefined): number {
 
 function StatItem({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md border border-slate-700/60 bg-slate-900/40 px-3 py-2.5">
-      <p className="text-xs font-medium text-slate-500">{label}</p>
-      <p className="mt-0.5 font-mono text-sm text-slate-100 tabular-nums">
+    <div className="rounded-lg border border-slate-200/90 bg-slate-50/80 px-3 py-2.5 dark:border-slate-700/50 dark:bg-slate-900/30">
+      <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+        {label}
+      </p>
+      <p className="mt-0.5 font-mono text-sm text-slate-800 tabular-nums dark:text-slate-100">
         {value}
       </p>
     </div>
@@ -42,12 +44,14 @@ function StatItem({ label, value }: { label: string; value: string }) {
 }
 
 function PctDisplay({ v }: { v: number | null }) {
-  if (v == null) return <span className="text-slate-500">—</span>;
+  if (v == null) return <span className="text-slate-400">—</span>;
   const up = v >= 0;
   return (
     <span
       className={`font-mono text-sm font-medium tabular-nums ${
-        up ? "text-emerald-400" : "text-red-400"
+        up
+          ? "text-emerald-600 dark:text-emerald-400"
+          : "text-red-500 dark:text-red-400"
       }`}
     >
       {formatPercent(v)}
@@ -85,14 +89,14 @@ export default async function CoinPage({ params, searchParams }: PageProps) {
       <div className="mb-4">
         <Link
           href="/"
-          className="text-sm text-slate-500 transition duration-150 hover:text-slate-300"
+          className="text-sm text-emerald-600 transition duration-150 hover:underline dark:text-emerald-400/90"
         >
           ← Back to market
         </Link>
       </div>
 
       {detailError && !coin && (
-        <p className="text-sm text-red-400" role="alert">
+        <p className="text-sm text-red-600 dark:text-red-400" role="alert">
           {detailError}
         </p>
       )}
@@ -109,17 +113,17 @@ export default async function CoinPage({ params, searchParams }: PageProps) {
                 className="h-8 w-8 rounded-full object-cover"
               />
             ) : null}
-            <h1 className="text-xl font-semibold text-slate-100">
+            <h1 className="text-xl font-semibold text-slate-800 dark:text-slate-100">
               {name}
               {symbol ? (
-                <span className="ml-2 text-base font-medium text-slate-500">
+                <span className="ml-2 text-base font-medium text-slate-500 dark:text-slate-400">
                   {symbol}
                 </span>
               ) : null}
             </h1>
           </div>
           <div className="mt-2 flex flex-wrap items-baseline gap-3">
-            <span className="font-mono text-2xl font-semibold tabular-nums text-slate-50">
+            <span className="font-mono text-2xl font-semibold tabular-nums text-slate-900 dark:text-slate-50">
               ${formatUsd(stats?.price ?? null)}
             </span>
             <span className="text-sm text-slate-500">24h</span>
@@ -130,8 +134,10 @@ export default async function CoinPage({ params, searchParams }: PageProps) {
 
       {coin && (
         <Card aria-label="Price chart" className="mb-4">
-          <div className="flex flex-col gap-2 border-b border-slate-700/60 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-sm font-medium text-slate-200">Price</h2>
+          <div className="flex flex-col gap-2 border-b border-slate-200/90 px-4 py-3 dark:border-slate-700/60 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-sm font-medium text-slate-700 dark:text-slate-200">
+              {name} price
+            </h2>
             <div
               className="flex flex-wrap gap-1.5"
               role="group"
@@ -143,10 +149,10 @@ export default async function CoinPage({ params, searchParams }: PageProps) {
                   <Link
                     key={d}
                     href={`/coins/${encodeURIComponent(id)}?days=${d}`}
-                    className={`rounded-md px-2.5 py-1.5 text-xs font-medium tabular-nums transition duration-150 ${
+                    className={`rounded-lg px-2.5 py-1.5 text-xs font-medium tabular-nums transition duration-150 ${
                       active
-                        ? "bg-slate-200 text-slate-900"
-                        : "border border-slate-600 text-slate-400 hover:border-slate-500 hover:text-slate-200"
+                        ? "bg-emerald-600 text-white shadow-sm dark:bg-emerald-500"
+                        : "border border-slate-200 bg-white text-slate-600 hover:border-emerald-500/30 dark:border-slate-600 dark:bg-slate-900/50 dark:text-slate-300 dark:hover:border-slate-500"
                     }`}
                   >
                     {label}
@@ -157,7 +163,7 @@ export default async function CoinPage({ params, searchParams }: PageProps) {
           </div>
           <CardBody>
             {chartError && (
-              <p className="text-sm text-red-400" role="alert">
+              <p className="text-sm text-red-600 dark:text-red-400" role="alert">
                 {chartError}
               </p>
             )}
