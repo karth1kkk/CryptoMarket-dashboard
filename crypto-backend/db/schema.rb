@@ -10,8 +10,49 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 0) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_27_113738) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
+  create_table "access_tokens", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "token"
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["token"], name: "index_access_tokens_on_token"
+    t.index ["user_id"], name: "index_access_tokens_on_user_id"
+  end
+
+  create_table "holdings", force: :cascade do |t|
+    t.decimal "amount"
+    t.decimal "avg_cost_usd"
+    t.string "coin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["user_id", "coin_id"], name: "index_holdings_on_user_id_and_coin_id", unique: true
+    t.index ["user_id"], name: "index_holdings_on_user_id"
+  end
+
+  create_table "users", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "email"
+    t.string "password_digest"
+    t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_users_on_email", unique: true
+  end
+
+  create_table "watchlist_items", force: :cascade do |t|
+    t.string "coin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["coin_id"], name: "index_watchlist_items_on_coin_id"
+    t.index ["user_id", "coin_id"], name: "index_watchlist_items_on_user_id_and_coin_id", unique: true
+    t.index ["user_id"], name: "index_watchlist_items_on_user_id"
+  end
+
+  add_foreign_key "access_tokens", "users"
+  add_foreign_key "holdings", "users"
+  add_foreign_key "watchlist_items", "users"
 end

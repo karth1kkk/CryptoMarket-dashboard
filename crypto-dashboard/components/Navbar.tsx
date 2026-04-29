@@ -43,6 +43,7 @@ export function Navbar() {
   const paramQ = searchParams.get("q") ?? "";
   const isHome = pathname === "/";
   const [value, setValue] = useState(paramQ);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
     startTransition(() => {
@@ -68,6 +69,30 @@ export function Navbar() {
     }, DEBOUNCE_MS);
     return () => clearTimeout(t);
   }, [value, isHome, paramQ, router]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const raw = localStorage.getItem("krypt:user");
+    if (!raw) {
+      setUserEmail(null);
+      return;
+    }
+    try {
+      const parsed = JSON.parse(raw) as { email?: string };
+      setUserEmail(parsed.email ?? null);
+    } catch {
+      setUserEmail(null);
+    }
+  }, []);
+
+  const onLogout = () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("krypt:token");
+      localStorage.removeItem("krypt:user");
+    }
+    setUserEmail(null);
+    router.push("/login");
+  };
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 shadow-sm shadow-slate-200/30 backdrop-blur-md dark:border-slate-800/80 dark:bg-[#0d1119]/95 dark:shadow-none">
@@ -117,7 +142,28 @@ export function Navbar() {
             />
           </div>
 
-          <div className="shrink-0">
+          <div className="shrink-0 flex items-center gap-2">
+            {userEmail ? (
+              <>
+                <span className="hidden max-w-[180px] truncate text-xs text-slate-500 dark:text-slate-400 sm:inline">
+                  {userEmail}
+                </span>
+                <button
+                  type="button"
+                  onClick={onLogout}
+                  className="rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-700 transition hover:bg-slate-100 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <Link
+                href="/login"
+                className="rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-700 transition hover:bg-slate-100 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
+              >
+                Login
+              </Link>
+            )}
             <ThemeToggle />
           </div>
         </div>

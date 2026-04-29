@@ -64,3 +64,57 @@ export async function searchCoins(q: string) {
     );
     return data.coins;
 }
+ export type AuthResponse = {
+  user: { id: number; email: string};
+  token: string;
+ };
+
+ export async function register(email:string, password: string, passwordConfirmation: string) {
+  const {data} = await apiClient.post<AuthResponse>("/api/v1/auth/register", {
+    user: { email, password, password_confirmation: passwordConfirmation},
+  })
+  return data;
+ }
+
+ export async function login(email:string, password: string){
+  const {data} = await apiClient.post<AuthResponse>("/api/v1/auth/login", {
+    user: {email, password},
+  })
+  return data;
+ }
+
+ export async function fetchWatchList() {
+  const {data} = await apiClient.get<{coin_ids: string[]}>("/api/v1/watchlist");
+  return data.coin_ids;
+ }
+
+ export async function addWatchList(coinId: string){
+  await apiClient.post("/api/v1/watchlist", {coin_id: coinId});
+ }
+
+ export async function removeWatchlist(coinId: string){
+  await apiClient.delete(`/api/v1/watchlist/${encodeURIComponent(coinId)}`);
+ }
+
+ export type Holding = { coin_id: string; amount: number; avg_cost_usd: number | null };
+
+ export async function fetchHoldings() {
+  const {data} = await apiClient.get<{holdings: Holding[]}>("/api/v1/holdings");
+  return data.holdings;
+ }
+
+ export async function createHolding(payload: Holding){
+  const {data} = await apiClient.post<Holding>("/api/v1/holdings/", { holding: payload });
+  return data;
+ }
+
+ export async function updateHolding(coinId: string, payload: Omit<Holding, "coin_id"> & {coin_id: string}){
+  const {data} = await apiClient.patch<Holding>(`/api/v1/holdings/${encodeURIComponent(coinId)}`, {
+    holding: payload,
+  });
+  return data;
+ }
+
+ export async function deleteHolding(coinId: string){
+  await apiClient.delete(`/api/v1/holdings/${encodeURIComponent(coinId)}`);
+ }

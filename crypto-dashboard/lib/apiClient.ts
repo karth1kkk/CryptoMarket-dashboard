@@ -12,3 +12,14 @@ export const apiClient = axios.create({
     headers: { Accept: "application/json" },
     timeout: 15_000,
 });
+
+apiClient.interceptors.request.use((config) => {
+    if (typeof window !== "undefined") {
+        const token = localStorage.getItem("krypt:token");
+        if(token) {
+            config.headers = config.headers ?? {};
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+    }
+    return config;
+})

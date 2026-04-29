@@ -16,11 +16,24 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
+      post "auth/register", to: "auth#register"
+      post "auth/login", to: "auth#login"
+
       get "market_overview", to: "market_overview#index"
+
       resources :coins, only: %i[index show], param: :id do
       get :market_chart, on: :member
       get :search, on: :collection
       end
+
+      get "watchlist", to: "watchlist_items#index"
+      post   "watchlist",           to: "watchlist_items#create"
+      delete "watchlist/:coin_id",  to: "watchlist_items#destroy"
+      
+      get    "holdings",     to: "holdings#index"
+      post   "holdings",     to: "holdings#create"
+      patch  "holdings/:id", to: "holdings#update"   # id = coin_id if you use coin_id in route
+      delete "holdings/:id", to: "holdings#destroy"
     end
   end
 end

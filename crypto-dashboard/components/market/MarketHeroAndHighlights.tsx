@@ -42,12 +42,12 @@ export function MarketHeroAndHighlights({
               a {chg.toFixed(1)}% change
             </span>{" "}
             in the last 24 hours.{" "}
-            <a
+            {/* <a
               href="#highlights"
               className="font-medium text-emerald-600 underline-offset-2 hover:underline dark:text-emerald-400/90"
             >
               Read more
-            </a>
+            </a> */}
           </p>
         )}
       </div>

@@ -3,7 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo, type KeyboardEvent } from "react";
+import { useCallback, useMemo, useState, type KeyboardEvent } from "react";
+import { addWatchList, removeWatchlist } from "@/lib/api";
 import type { CoinMarket } from "@/types/coin";
 import { formatCompactUsd, formatPercent, formatUsd } from "@/lib/format";
 import { Sparkline } from "@/components/Sparkline";
@@ -56,6 +57,32 @@ function MarketRow({ coin: c, rank }: RowProps) {
     },
     [go]
   );
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const onWatchList = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    const token =
+    typeof window !== "undefined" ? localStorage.getItem("krypt:token") : null;
+  if (!token) {
+    router.push(`/login?next=${encodeURIComponent(href)}`);
+    return;
+  }
+    if (saving) return;
+    setSaving(true);
+    try{
+      if (saved) {
+        await removeWatchlist(c.id);
+        setSaved(false);
+      } else{
+        await addWatchList(c.id);
+        setSaved(true);
+      }
+      }finally{
+        setSaving(false);
+      }
+    }, [c.id, saved, saving, router]);
 
   return (
     <tr
@@ -99,6 +126,12 @@ function MarketRow({ coin: c, rank }: RowProps) {
         >
           View
         </Link>
+      </td>
+      <td className="hidden py-2 pr-1 text-center sm:table-cell">
+        <button type="button" onClick={onWatchList} className="text-xs-font-medium text-emerald-600 hover:underline disabled:opacity-50 dark:text-emerald-400"
+        disabled={saving}>
+          {saved ? "Saved" : "Watch"}
+        </button>
       </td>
       <td className="whitespace-nowrap py-2 pr-2 text-right font-mono text-[12px] text-slate-800 tabular-nums sm:text-[13px] dark:text-slate-200">
         ${formatUsd(c.current_price)}
