@@ -6,8 +6,19 @@
 # Read more: https://github.com/cyu/rack-cors
 
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
+  frontend_origins =
+    ENV.fetch("FRONTEND_URL", "https://crypto-market-dashboard-dusky.vercel.app/")
+       .split(",")
+       .map { |o| o.strip }
+       .reject(&:empty?)
+
   allow do
-    origins ENV.fetch("FRONTEND_URL", "http://localhost:3000")
+    # Support one or many explicit origins via FRONTEND_URL CSV.
+    # Example: FRONTEND_URL="http://localhost:3000,https://app.vercel.app"
+    origins(*frontend_origins)
+
+    # Allow Vercel preview deployments in production.
+    origins %r{\Ahttps://.*\.vercel\.app\z}
 
     resource "*",
       headers: :any,
