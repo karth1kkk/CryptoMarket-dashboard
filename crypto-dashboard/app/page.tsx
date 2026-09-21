@@ -80,7 +80,7 @@ function MarketError({
         {isRate ? "Data API rate limit" : "Could not load markets"}
       </p>
       <p className="mt-1 text-sm opacity-90">{message}</p>
-      {!isRate && (
+      {/* {!isRate && (
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
           Is the API running? Check{" "}
           <code className="font-mono text-sm text-slate-800 dark:text-slate-300">
@@ -88,7 +88,7 @@ function MarketError({
           </code>
           .
         </p>
-      )}
+      )} */}
     </div>
   );
 }

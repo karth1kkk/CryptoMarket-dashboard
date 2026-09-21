@@ -1,7 +1,7 @@
 import { isAxiosError } from "axios";
 
 const RATE_LIMIT_MESSAGE =
-  "The market data service is rate-limited. Wait a minute and try again, or set COINGECKO_API_KEY in the API server (see crypto-backend).";
+  "The market data service is rate-limited. Wait a minute and try again, COINGECKO FREE PLAN ONLY ALLOWS 100 REQUESTS PER DAY";
 
 export function isApiRateLimitError(error: unknown): boolean {
   if (!isAxiosError(error)) return false;
