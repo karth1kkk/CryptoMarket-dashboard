@@ -60,3 +60,5 @@ gem "rack-cors"
 
 # Rate limiting
 gem "rack-attack"
+
+gem 'dotenv-rails', groups: [:development, :test]
