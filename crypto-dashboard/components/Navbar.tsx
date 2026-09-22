@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { startTransition, useEffect, useState } from "react";
+import { startTransition, useCallback, useEffect, useState } from "react";
 import { ThemeToggle } from "./ThemeToggle";
 
 const DEBOUNCE_MS = 320;
@@ -13,6 +13,20 @@ const PRIMARY_NAV = [
   { href: "/watchlist", label: "Watchlist" },
   { href: "/portfolio", label: "Portfolio" },
 ] as const;
+
+export const AUTH_CHANGED_EVENT = "krypt:auth-changed";
+
+function readUserEmail(): string | null {
+  if (typeof window === "undefined") return null;
+  const raw = localStorage.getItem("krypt:user");
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as { email?: string };
+    return parsed.email ?? null;
+  } catch {
+    return null;
+  }
+}
 
 function useIsActive(href: string) {
   const pathname = usePathname();
@@ -45,6 +59,32 @@ export function Navbar() {
   const [value, setValue] = useState(paramQ);
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
+  // Re-read auth state whenever it might change
+  const syncUser = useCallback(() => {
+    setUserEmail(readUserEmail());
+  }, []);
+
+  useEffect(() => {
+    syncUser();
+  }, [syncUser]);
+
+  // React to auth changes from the same tab
+  useEffect(() => {
+    const onAuthChanged = () => syncUser();
+    window.addEventListener(AUTH_CHANGED_EVENT, onAuthChanged);
+    // React to auth changes from other tabs
+    window.addEventListener("storage", onAuthChanged);
+    return () => {
+      window.removeEventListener(AUTH_CHANGED_EVENT, onAuthChanged);
+      window.removeEventListener("storage", onAuthChanged);
+    };
+  }, [syncUser]);
+
+  // Fallback: re-check on every route change (covers redirect-after-login)
+  useEffect(() => {
+    syncUser();
+  }, [pathname, syncUser]);
+
   useEffect(() => {
     startTransition(() => {
       setValue(paramQ);
@@ -70,25 +110,11 @@ export function Navbar() {
     return () => clearTimeout(t);
   }, [value, isHome, paramQ, router]);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const raw = localStorage.getItem("krypt:user");
-    if (!raw) {
-      setUserEmail(null);
-      return;
-    }
-    try {
-      const parsed = JSON.parse(raw) as { email?: string };
-      setUserEmail(parsed.email ?? null);
-    } catch {
-      setUserEmail(null);
-    }
-  }, []);
-
   const onLogout = () => {
     if (typeof window !== "undefined") {
       localStorage.removeItem("krypt:token");
       localStorage.removeItem("krypt:user");
+      window.dispatchEvent(new Event(AUTH_CHANGED_EVENT));
     }
     setUserEmail(null);
     router.push("/login");
